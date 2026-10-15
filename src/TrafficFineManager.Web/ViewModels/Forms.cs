@@ -24,7 +24,7 @@ public class FineVm
     [Range(1, int.MaxValue, ErrorMessage = "Araç seçin."), Display(Name = "Araç")] public int VehicleId { get; set; }
     [Required, StringLength(50), Display(Name = "Tutanak / ceza numarası")] public string ReferenceNumber { get; set; } = "";
     [Required, DataType(DataType.Date), Display(Name = "İhlal tarihi")] public DateOnly ViolationDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
-    [Range(typeof(decimal), "0.01", "999999999.99", ErrorMessage = "Tutar 0,01 ile 999.999.999,99 arasında olmalıdır."), Display(Name = "Tutar (₺)")] public decimal Amount { get; set; }
+    [Range(typeof(decimal), "0.01", "999999999.99", ParseLimitsInInvariantCulture = true, ErrorMessage = "Tutar 0,01 ile 999.999.999,99 arasında olmalıdır."), Display(Name = "Tutar (₺)")] public decimal Amount { get; set; }
     [Required, StringLength(1000), Display(Name = "Açıklama")] public string Description { get; set; } = "";
     public Guid Version { get; set; }
     public List<SelectListItem> Vehicles { get; set; } = [];

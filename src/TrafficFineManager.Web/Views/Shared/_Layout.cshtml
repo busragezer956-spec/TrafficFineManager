@@ -21,7 +21,7 @@
 <main class="@(User.Identity?.IsAuthenticated == true ? "workspace" : "login-workspace")">
 @if (User.Identity?.IsAuthenticated == true)
 {
-<header class="topbar"><span>FİLO OPERASYONLARI <b>/</b> TRAFİK CEZASI YÖNETİMİ</span><span class="topbar-date">@DateTime.Now.ToString("dd MMMM yyyy")</span></header>
+<header class="topbar"><span>FİLO OPERASYONLARI <b>/</b> TRAFİK CEZASI YÖNETİMİ</span><div class="topbar-right"><span class="topbar-date">@DateTime.Now.ToString("dd MMMM yyyy")</span><form class="mobile-logout" asp-controller="Account" asp-action="Logout" method="post"><button class="logout" type="submit">Çıkış ↗</button></form></div></header>
 }
 <div class="content">
 @if (TempData["Success"] is string success) { <div class="alert success" role="status">✓ @success</div> }
