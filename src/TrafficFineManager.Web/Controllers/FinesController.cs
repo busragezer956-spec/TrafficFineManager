@@ -11,15 +11,21 @@ namespace TrafficFineManager.Web.Controllers;
 public class FinesController(AppDbContext db, FineWorkflowService workflow) : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> Index(string? search, FineStatus? status, int page = 1, CancellationToken ct = default)
+    public async Task<IActionResult> Index(string? search, FineStatus? status, bool mine = false, int page = 1, CancellationToken ct = default)
     {
         if (status.HasValue && !Enum.IsDefined(status.Value)) return BadRequest();
+        if (mine)
+        {
+            if (User.IsInRole(Roles.Manager)) status = FineStatus.ManagerApproval;
+            else if (User.IsInRole(Roles.Finance)) status = FineStatus.FinanceApproval;
+            else return Forbid();
+        }
         var query = db.TrafficFines.AsNoTracking().Include(x => x.Vehicle).AsQueryable();
         if (!string.IsNullOrWhiteSpace(search)) { var term = search.Trim(); query = query.Where(x => x.ReferenceNumber.Contains(term) || x.Vehicle.Plate.Contains(term)); }
         if (status.HasValue) query = query.Where(x => x.Status == status);
         var total = await query.CountAsync(ct);
         page = Math.Clamp(page, 1, Math.Max(1, (int)Math.Ceiling(total / 15d)));
-        return View(new FineListVm { Search = search, Status = status, Page = page, Total = total,
+        return View(new FineListVm { Search = search, Status = status, Mine = mine, Page = page, Total = total,
             Items = await query.OrderByDescending(x => x.CreatedAt).ThenByDescending(x => x.Id).Skip((page - 1) * 15).Take(15).ToListAsync(ct) });
     }
     [HttpGet]

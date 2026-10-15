@@ -146,4 +146,24 @@ public class HttpTests
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
         Assert.DoesNotContain("example.com", response.Headers.Location!.ToString());
     }
+
+    [Theory]
+    [InlineData("yonetici@demo.local", "DEMO-2026-002", "DEMO-2026-003")]
+    [InlineData("finans@demo.local", "DEMO-2026-003", "DEMO-2026-002")]
+    public async Task My_queue_only_shows_current_users_approval_stage(string email, string expected, string excluded)
+    {
+        await using var factory = new Factory(); using var client = Client(factory);
+        await Login(client, email);
+        var html = WebUtility.HtmlDecode(await client.GetStringAsync("/Fines?mine=true"));
+        Assert.Contains(expected, html); Assert.DoesNotContain(excluded, html);
+        Assert.Contains("Onayımı bekleyenler", html);
+    }
+    [Fact] public async Task Operator_cannot_request_approval_queue()
+    {
+        await using var factory = new Factory(); using var client = Client(factory);
+        await Login(client, "operasyon@demo.local");
+        var response = await client.GetAsync("/Fines?mine=true");
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Contains("/Account/Denied", response.Headers.Location!.ToString());
+    }
 }

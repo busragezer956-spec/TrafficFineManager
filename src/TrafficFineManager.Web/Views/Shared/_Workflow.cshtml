@@ -1,0 +1,14 @@
+@model FineStatus
+@{ var steps = new[] { FineStatus.New, FineStatus.ManagerApproval, FineStatus.FinanceApproval, FineStatus.Completed }; }
+<section class="workflow-panel" aria-label="Onay süreci">
+<ol class="workflow-steps">
+@for (var i = 0; i < steps.Length; i++)
+{
+    var active = Model == steps[i];
+    var done = Model != FineStatus.Rejected && (int)Model > i;
+    <li class="@(active ? "current" : done ? "done" : "")" aria-current="@(active ? "step" : null)"><span class="step-number">@(done ? "✓" : (i + 1).ToString())</span><span>@steps[i].Label()</span></li>
+}
+</ol>
+@if (Model == FineStatus.Rejected)
+{ <p class="workflow-rejected">Kayıt reddedildi. Gerekçeyi geçmişten inceleyin. Operasyon düzeltip yeniden gönderdiğinde süreç yönetici onayından başlar.</p> }
+</section>

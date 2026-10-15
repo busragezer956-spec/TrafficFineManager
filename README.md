@@ -90,6 +90,12 @@ tests/TrafficFineManager.Tests/
 
 EF Core DbContext unit-of-work davranışını zaten sağlar; case ölçeğinde ek generic repository veya mikroservis katmanı kullanılmadı. İş kuralları controller'dan ayrılmış tek bir serviste toplanır. Durum değişikliği ile geçmiş aynı `SaveChangesAsync` içinde atomik olarak yazılır. Durumlar veritabanında integer enum olarak saklanır; enum değerleri sonradan yeniden sıralanmamalıdır.
 
+## Kullanım kolaylıkları
+
+- Ceza detayındaki dört aşamalı süreç göstergesi mevcut durumu belirtir. Ret durumunda yeniden değerlendirme kuralı açıklanır.
+- Yönetici ve finans, ceza listesinde **Onayımı bekleyenler** sekmesinden kendi aşamalarındaki kayıtlara ulaşır. Filtre sunucuda oturum rolüne göre hesaplanır.
+- Düzenleme geçmişi değişen tutanak, araç, tarih ve tutarın önceki/yeni değerlerini kaydeder. Açıklama değişikliği ayrıca belirtilir. Değişikliksiz kaydetme gereksiz geçmiş üretmez.
+
 ## Güvenlik ve hata yönetimi
 
 ASP.NET Core Identity şifre hash'leme ve cookie oturumunu yönetir. Beş hatalı girişten sonra beş dakika kilitleme uygulanır. Rol denetimi hem controller hem işlem servisinde yapılır. Tüm POST işlemlerinde antiforgery token doğrulanır. Razor metinleri otomatik encode eder. Dış adrese login yönlendirmesi yapılmaz. Üretim hataları kullanıcıya stack trace göstermez. Plaka ve tutanak benzersizliği veritabanı index'i ile de korunur. Demo kullanıcıları sadece Development ve `Demo:Enabled=true` iken oluşturulur.

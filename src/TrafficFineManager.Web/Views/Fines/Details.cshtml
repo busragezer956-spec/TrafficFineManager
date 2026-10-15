@@ -2,6 +2,7 @@
 @{ ViewData["Title"] = Model.ReferenceNumber; var canEdit = FineWorkflowService.CanEdit(Model, User); var canDecide = FineWorkflowService.CanDecide(Model, User); }
 <a class="back-link" asp-action="Index">← Trafik cezalarına dön</a>
 <div class="page-heading"><div><p class="eyebrow">CEZA DETAYI · #@Model.Id.ToString("D4")</p><h1>@Model.ReferenceNumber</h1><p class="muted">@Model.Vehicle.Plate · @Model.Vehicle.Brand @Model.Vehicle.Model</p></div><partial name="_Status" model="Model.Status" /></div>
+<partial name="_Workflow" model="Model.Status" />
 <div class="detail-grid"><section class="panel"><div class="panel-heading"><h2>Ceza bilgileri</h2>@if (canEdit) { <a class="text-link" asp-action="Edit" asp-route-id="@Model.Id">Düzenle ↗</a> }</div><dl class="detail-list"><div><dt>Araç plakası</dt><dd><span class="plate">@Model.Vehicle.Plate</span></dd></div><div><dt>Araç tipi</dt><dd>@Model.Vehicle.Type.Label()</dd></div><div><dt>İhlal tarihi</dt><dd>@Model.ViolationDate.ToString("dd MMMM yyyy")</dd></div><div><dt>Ceza tutarı</dt><dd class="large-amount">@Model.Amount.ToString("N2") ₺</dd></div><div><dt>Oluşturulma</dt><dd>@Model.CreatedAt.ToOffset(TimeSpan.FromHours(3)).ToString("dd.MM.yyyy HH:mm")</dd></div><div class="description-row"><dt>Açıklama</dt><dd class="preserve-lines">@Model.Description</dd></div></dl></section>
 <section class="panel action-panel"><div class="panel-heading"><h2>Sıradaki adım</h2></div><div class="action-content">
 @if (canEdit)

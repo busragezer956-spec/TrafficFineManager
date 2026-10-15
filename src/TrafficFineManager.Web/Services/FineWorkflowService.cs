@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using TrafficFineManager.Web.Data;
 using TrafficFineManager.Web.Models;
@@ -38,12 +39,29 @@ public class FineWorkflowService(AppDbContext db, TimeProvider clock)
         Require(CanEdit(fine, user), "Yalnızca size ait yeni veya reddedilmiş kayıtları düzenleyebilirsiniz.");
         CheckVersion(fine, input.Version);
         await ValidateAsync(input, ct);
+        var changes = new List<string>();
+        if (fine.VehicleId != input.VehicleId)
+        {
+            var plates = await db.Vehicles.Where(x => x.Id == fine.VehicleId || x.Id == input.VehicleId)
+                .ToDictionaryAsync(x => x.Id, x => x.Plate, ct);
+            changes.Add($"Araç: {plates[fine.VehicleId]} → {plates[input.VehicleId]}");
+        }
+        var reference = NormalizeReference(input.ReferenceNumber);
+        if (fine.ReferenceNumber != reference) changes.Add($"Tutanak: {fine.ReferenceNumber} → {reference}");
+        if (fine.ViolationDate != input.ViolationDate) changes.Add($"İhlal tarihi: {fine.ViolationDate:dd.MM.yyyy} → {input.ViolationDate:dd.MM.yyyy}");
+        if (fine.Amount != input.Amount)
+        {
+            var culture = CultureInfo.GetCultureInfo("tr-TR");
+            changes.Add($"Tutar: {fine.Amount.ToString("N2", culture)} ₺ → {input.Amount.ToString("N2", culture)} ₺");
+        }
+        if (fine.Description != input.Description.Trim()) changes.Add("Açıklama değiştirildi.");
+        Require(changes.Count > 0, "Kaydedilecek bir değişiklik bulunamadı.");
         fine.VehicleId = input.VehicleId;
         fine.ReferenceNumber = NormalizeReference(input.ReferenceNumber);
         fine.ViolationDate = input.ViolationDate;
         fine.Amount = input.Amount;
         fine.Description = input.Description.Trim();
-        AddHistory(fine, user, WorkflowAction.Edited, fine.Status, "Ceza bilgileri güncellendi.");
+        AddHistory(fine, user, WorkflowAction.Edited, fine.Status, string.Join("\n", changes));
         fine.Version = Guid.NewGuid();
         await SaveAsync(ct);
     }

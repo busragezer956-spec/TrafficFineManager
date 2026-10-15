@@ -150,4 +150,26 @@ public class WorkflowTests : IAsyncLifetime
     {
         var id = await Create(); await Assert.ThrowsAsync<WorkflowException>(() => Act(id, (WorkflowAction)999, op));
     }
+
+    [Fact] public async Task Editing_records_field_changes_with_old_and_new_values()
+    {
+        var id = await Create();
+        var input = Input("EDIT-001"); input.Id = id; input.Amount = 2000.50m;
+        input.Description = "Düzeltilen açıklama";
+        input.Version = (await db.TrafficFines.FindAsync(id))!.Version;
+        await service.EditAsync(input, op);
+        var history = await db.ApprovalHistories.SingleAsync(x => x.Action == WorkflowAction.Edited);
+        Assert.Contains("1.500,25 ₺ → 2.000,50 ₺", history.Note);
+        Assert.Contains("TEST-001 → EDIT-001", history.Note);
+        Assert.Contains("Açıklama değiştirildi", history.Note);
+        Assert.Equal(FineStatus.New, history.PreviousStatus);
+        Assert.Equal(FineStatus.New, history.NewStatus);
+    }
+    [Fact] public async Task Saving_unchanged_record_does_not_add_misleading_history()
+    {
+        var id = await Create(); var input = Input(); input.Id = id;
+        input.Version = (await db.TrafficFines.FindAsync(id))!.Version;
+        await Assert.ThrowsAsync<WorkflowException>(() => service.EditAsync(input, op));
+        Assert.Equal(1, await db.ApprovalHistories.CountAsync());
+    }
 }
