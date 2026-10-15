@@ -33,7 +33,7 @@ Değerlendiricinin repository'yi açabildiğini doğrulayın. Private repository
 - **Neden reddedilen kayıt yöneticiye döner?** Düzeltilen tutar veya bilgiler önceki onayı geçersiz kılabilir; süreç baştan değerlendirilir.
 - **Neden onaydaki kayıt değişmiyor?** Kullanıcıların onayladığı içerik süreç içinde sessizce değişmesin.
 - **Neden repository yok?** Bu ölçekte DbContext'in üzerine aynı metotları saran katman ek fayda sağlamıyor.
-- **Neden migration yok?** İlk case kurulumu basit tutuldu. Kalıcı şema evriminde migration'a geçmek gerekir; bu sınırlama README'de açıkça yazılı.
+- **Migration nasıl uygulanıyor?** Development açılışında MigrateAsync başlangıç şemasını oluşturur; üretimde migration script'leri kontrollü uygulanmalıdır. Model snapshot, EF'nin sonraki değişikliği hesaplamasını sağlar.
 - **SQLite testleri SQL Server testinin yerini tutar mı?** Hayır. İş kuralları ve ilişkisel concurrency test edilir; SQL Server kurulumu ve sağlayıcı davranışı ayrıca yerel kabul testinden geçer.
 
 Kodu teslim etmeden önce özellikle `FineWorkflowService`, `AppDbContext`, `FinesController` ve testleri okuyup kendi cümlelerinizle anlatın. Live Session'da anlamadığınız bir bölümü biliyormuş gibi sunmayın.

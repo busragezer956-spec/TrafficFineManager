@@ -85,6 +85,7 @@ src/TrafficFineManager.Web/
 
 tests/TrafficFineManager.Tests/
   WorkflowTests.cs  SQLite ilişkisel veritabanıyla iş akışı testleri
+  HttpTests.cs      InMemory HTTP testleri; isteğe bağlı SQL Server modu
 ```
 
 EF Core DbContext unit-of-work davranışını zaten sağlar; case ölçeğinde ek generic repository veya mikroservis katmanı kullanılmadı. İş kuralları controller'dan ayrılmış tek bir serviste toplanır. Durum değişikliği ile geçmiş aynı `SaveChangesAsync` içinde atomik olarak yazılır. Durumlar veritabanında integer enum olarak saklanır; enum değerleri sonradan yeniden sıralanmamalıdır.
@@ -100,11 +101,28 @@ dotnet build TrafficFineManager.sln --configuration Release
 dotnet test TrafficFineManager.sln --configuration Release
 ```
 
-SQLite testler için kullanılır; uygulamanın çalışma veritabanı SQL Server'dır. İlişkisel testler doğru/yanlış rol, ret gerekçesi, düzenleme sahipliği, tam onay akışı, yeniden gönderim, tutar/tarih doğrulaması, mükerrer kayıt ve iki DbContext ile concurrency senaryolarını kapsar. SQL Server kurulumunu ayrıca yerelde doğrulamak gerekir. Ayrıntılı kabul senaryosu `docs/KABUL-TESTI.md` dosyasındadır.
+SQLite iş kuralı testleri, EF InMemory HTTP/ekran testleri için kullanılır; uygulamanın çalışma veritabanı SQL Server'dır. İlişkisel testler doğru/yanlış rol, ret gerekçesi, düzenleme sahipliği, tam onay akışı, yeniden gönderim, tutar/tarih doğrulaması, mükerrer kayıt ve iki DbContext ile concurrency senaryolarını kapsar. HTTP testleri giriş, CSRF, rol erişimi, ekran render ve Türkçe tutar girişini kontrol eder; aynı testler isteğe bağlı gerçek SQL Server ile de çalıştırılabilir. Ayrıntılı kabul senaryosu `docs/KABUL-TESTI.md` dosyasındadır.
+
+SQL Server HTTP testlerini çalıştırmak için (yeni test veritabanı oluşturma/silme yetkisi gerekir):
+
+```powershell
+$env:TFM_TEST_SQLSERVER = "Server=(localdb)\MSSQLLocalDB;Trusted_Connection=True;TrustServerCertificate=True"
+dotnet test --configuration Release
+```
+
+HTTP testleri rastgele isimli kendi veritabanlarını oluşturur ve sonunda yalnızca bu test veritabanlarını siler. `TFM_TEST_SQLSERVER` verilmezse HTTP testleri EF InMemory üzerinde çalışır; hiçbir test atlanmaz. Bu varsayılan çalışma SQL Server sağlayıcısının doğrulandığı anlamına gelmez.
 
 ## Şema yönetimi / kapsam sınırları
 
-Bu case ilk kurulumda geliştirme veritabanını `EnsureCreatedAsync` ile oluşturur. Migration geçmişi içermez; mevcut bir şemayı otomatik değiştirmez. Şema değişirse örnek geliştirme veritabanını yedekledikten sonra yeni bir veritabanı adı kullanın. Üretim ortamına geçmeden önce başlangıç migration'ı, kontrollü deployment, ayrı kullanıcı yönetimi ve güvenli provisioning gerekir. Production'da otomatik seed/şema oluşturma çalışmaz. `EnsureCreated` ile migration aynı veritabanında karıştırılmamalıdır.
+Başlangıç migration'ı ve model snapshot kaynak kodda bulunur. Development demo açılışında `MigrateAsync` ile uygulanır. Production'da otomatik migration ve seed çalışmaz. Yeni şema değişikliklerinde yerel EF aracı kullanılabilir:
+
+```powershell
+dotnet tool restore
+dotnet ef migrations add AciklayiciDegisiklikAdi --project src/TrafficFineManager.Web
+dotnet ef database update --project src/TrafficFineManager.Web
+```
+
+Üretim dağıtımında migration SQL script'i incelenerek kontrollü uygulanmalı; demo hesapları yerine gerçek kullanıcı provisioning'i yapılmalıdır. Test amaçlı SQLite veritabanları `EnsureCreated` kullanır; SQL Server migration'ları bu test sağlayıcısına uygulanmaz.
 
 Ceza listesi 15 kayıtlık sayfalama ve durum/plaka/tutanak filtreleri içerir. Araç listesi en fazla 200 sonucu gösterir ve aramayı destekler. Dosya yükleme, e-posta, ödeme ve harici servis entegrasyonu bu case kapsamı dışında bırakılmıştır.
 
