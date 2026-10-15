@@ -49,6 +49,7 @@ app.MapControllerRoute("default", "{controller=Dashboard}/{action=Index}/{id?}")
 if (app.Environment.IsDevelopment() && app.Configuration.GetValue<bool>("Demo:Enabled"))
 {
     await using var scope = app.Services.CreateAsyncScope();
+    await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
     await DemoSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
 }
 app.Run();

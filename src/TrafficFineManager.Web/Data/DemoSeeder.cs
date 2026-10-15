@@ -13,8 +13,6 @@ public static class DemoSeeder
         if (string.IsNullOrWhiteSpace(password))
             throw new InvalidOperationException("Demo:Password eksik. README'deki user-secrets komutunu çalıştırın.");
         var db = services.GetRequiredService<AppDbContext>();
-        // Case'in ilk çalıştırması için. Şema değişikliğinde migration stratejisine geçilmelidir.
-        await db.Database.EnsureCreatedAsync();
         var users = services.GetRequiredService<UserManager<IdentityUser>>();
         var roles = services.GetRequiredService<RoleManager<IdentityRole>>();
         foreach (var role in new[] { Roles.Operator, Roles.Manager, Roles.Finance })
