@@ -1,0 +1,9 @@
+@model VehicleVm
+@{ ViewData["Title"] = "Araç ekle"; }
+<a class="back-link" asp-action="Index">← Araç filosuna dön</a><div class="page-heading"><div><p class="eyebrow">YENİ ARAÇ</p><h1>Filoya araç ekle</h1><p class="muted">Her plaka sistemde yalnızca bir kez tanımlanabilir.</p></div></div>
+<section class="panel form-panel"><form asp-action="Create" method="post"><div asp-validation-summary="ModelOnly" class="validation"></div><div class="form-grid">
+<div class="field"><label asp-for="Plate"></label><input asp-for="Plate" placeholder="34 ABC 123" /><span asp-validation-for="Plate"></span></div>
+<div class="field"><label asp-for="Type"></label><select asp-for="Type" asp-items="Html.GetEnumSelectList<VehicleType>()"></select><span asp-validation-for="Type"></span></div>
+<div class="field"><label asp-for="Brand"></label><input asp-for="Brand" placeholder="Mercedes-Benz" /><span asp-validation-for="Brand"></span></div>
+<div class="field"><label asp-for="Model"></label><input asp-for="Model" placeholder="Actros" /><span asp-validation-for="Model"></span></div></div>
+<div class="form-actions"><a class="btn secondary" asp-action="Index">Vazgeç</a><button class="btn primary" type="submit">Aracı kaydet →</button></div></form></section>

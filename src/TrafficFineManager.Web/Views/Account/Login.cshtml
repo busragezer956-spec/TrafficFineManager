@@ -1,0 +1,8 @@
+@model LoginVm
+@{ ViewData["Title"] = "Giriş"; }
+<div class="login-shell"><section class="login-story"><a class="brand" asp-controller="Dashboard" asp-action="Index"><span class="brand-icon">F</span> FiloKontrol</a><div><p class="eyebrow">DAHA ŞEFFAF BİR ONAY SÜRECİ</p><h1>Filonuz hareket etsin.<br />Süreçleriniz<br /><em>kontrol altında kalsın.</em></h1><p>Araçlarınızı, trafik cezalarını ve onay akışını tek çalışma alanından yönetin.</p><div class="login-steps"><span>01 · Kaydet</span><span>02 · Onayla</span><span>03 · Takip et</span></div></div><small>TRAFİK CEZASI YÖNETİM MODÜLÜ</small></section>
+<section class="login-card"><p class="eyebrow">ÇALIŞMA ALANINIZA HOŞ GELDİNİZ</p><h2>Oturum açın</h2><p class="muted">Devam etmek için kullanıcı bilgilerinizle giriş yapın.</p>
+<form asp-action="Login" method="post"><input asp-for="ReturnUrl" type="hidden" /><div asp-validation-summary="ModelOnly" class="validation"></div>
+<div class="field"><label asp-for="Email"></label><input asp-for="Email" autocomplete="username" placeholder="ad@firma.com" /><span asp-validation-for="Email"></span></div>
+<div class="field"><label asp-for="Password"></label><input asp-for="Password" autocomplete="current-password" /><span asp-validation-for="Password"></span></div>
+<button class="btn primary full" type="submit">Giriş yap <span>→</span></button></form><p class="login-foot">Rolünüze ait işlemler giriş yaptıktan sonra görüntülenir.</p></section></div>

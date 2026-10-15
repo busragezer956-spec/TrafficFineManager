@@ -1,0 +1,8 @@
+@model IEnumerable<TrafficFine>
+<div class="table-wrap"><table><thead><tr><th>TUTANAK NO</th><th>ARAÇ</th><th>İHLAL TARİHİ</th><th>TUTAR</th><th>DURUM</th><th><span class="sr-only">Detay</span></th></tr></thead><tbody>
+@foreach (var fine in Model)
+{
+<tr><td><a class="reference" asp-controller="Fines" asp-action="Details" asp-route-id="@fine.Id">@fine.ReferenceNumber</a></td><td><span class="plate">@fine.Vehicle.Plate</span><small class="cell-sub">@fine.Vehicle.Brand @fine.Vehicle.Model</small></td><td>@fine.ViolationDate.ToString("dd.MM.yyyy")</td><td class="amount">@fine.Amount.ToString("N2") ₺</td><td><partial name="_Status" model="fine.Status" /></td><td><a class="detail-link" asp-controller="Fines" asp-action="Details" asp-route-id="@fine.Id" aria-label="@fine.ReferenceNumber detayını aç">↗</a></td></tr>
+}
+</tbody></table></div>
+@if (!Model.Any()) { <div class="empty"><strong>Henüz kayıt yok</strong><p>Yeni bir ceza ekleyebilir veya arama filtrelerini değiştirebilirsiniz.</p></div> }

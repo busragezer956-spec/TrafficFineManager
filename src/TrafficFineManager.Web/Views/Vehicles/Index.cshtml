@@ -1,0 +1,7 @@
+@model List<Vehicle>
+@{ ViewData["Title"] = "Araç filosu"; }
+<div class="page-heading"><div><p class="eyebrow">FİLO YÖNETİMİ</p><h1>Araç filosu</h1><p class="muted">Binek, çekici, dorse ve kiralık araç kayıtları.</p></div>@if (User.IsInRole(Roles.Operator)) { <a class="btn primary" asp-action="Create">＋ Araç ekle</a> }</div>
+<section class="panel"><form class="filters" method="get"><div class="search"><label class="sr-only" for="search">Araç ara</label><input id="search" name="search" value="@ViewBag.Search" placeholder="Plaka, marka veya model ara…" maxlength="60" /></div><button class="btn secondary" type="submit">Ara</button><a class="text-link" asp-action="Index">Temizle</a></form>
+<div class="table-wrap"><table><thead><tr><th>PLAKA</th><th>ARAÇ TİPİ</th><th>MARKA</th><th>MODEL</th></tr></thead><tbody>@foreach (var vehicle in Model) { <tr><td><span class="plate">@vehicle.Plate</span></td><td>@vehicle.Type.Label()</td><td>@vehicle.Brand</td><td>@vehicle.Model</td></tr> }</tbody></table></div>
+@if (Model.Count == 0) { <div class="empty"><strong>Araç bulunamadı.</strong><p>Yeni bir araç ekleyin veya aramanızı değiştirin.</p></div> }
+<div class="panel-footer">@Model.Count kayıt gösteriliyor · En fazla 200 araç listelenir. Daha fazla kayıt için aramayı kullanın.</div></section>

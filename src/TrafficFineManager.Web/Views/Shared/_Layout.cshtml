@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>@ViewData["Title"] · FiloKontrol</title><link rel="stylesheet" href="~/css/site.css" asp-append-version="true" /></head>
+<body>
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <aside class="sidebar">
+        <a class="brand" asp-controller="Dashboard" asp-action="Index"><span class="brand-icon">F</span> FiloKontrol<span class="brand-dot">●</span></a>
+        <p class="nav-label">ÇALIŞMA ALANI</p>
+        <nav aria-label="Ana menü">
+            <a class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")" asp-controller="Dashboard" asp-action="Index"><span>◫</span> Genel bakış</a>
+            <a class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Fines" ? "active" : "")" asp-controller="Fines" asp-action="Index"><span>≡</span> Trafik cezaları</a>
+            <a class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Vehicles" ? "active" : "")" asp-controller="Vehicles" asp-action="Index"><span>▣</span> Araç filosu</a>
+        </nav>
+        <div class="sidebar-note"><span class="online-dot"></span> Süreç kontrol altında<p>Tüm onay ve ret işlemleri kayıt altına alınır.</p></div>
+        <div class="profile"><strong>@(User.IsInRole(Roles.Operator) ? "Operasyon" : User.IsInRole(Roles.Manager) ? "Yönetici" : "Finans")</strong><small>@User.Identity.Name</small>
+        <form asp-controller="Account" asp-action="Logout" method="post"><button class="logout" type="submit">Oturumu kapat ↗</button></form></div>
+    </aside>
+}
+<main class="@(User.Identity?.IsAuthenticated == true ? "workspace" : "login-workspace")">
+@if (User.Identity?.IsAuthenticated == true)
+{
+<header class="topbar"><span>FİLO OPERASYONLARI <b>/</b> TRAFİK CEZASI YÖNETİMİ</span><span class="topbar-date">@DateTime.Now.ToString("dd MMMM yyyy")</span></header>
+}
+<div class="content">
+@if (TempData["Success"] is string success) { <div class="alert success" role="status">✓ @success</div> }
+@if (TempData["Error"] is string error) { <div class="alert error" role="alert">@error</div> }
+@RenderBody()
+</div>
+</main><script src="~/js/site.js" asp-append-version="true" defer></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body></html>

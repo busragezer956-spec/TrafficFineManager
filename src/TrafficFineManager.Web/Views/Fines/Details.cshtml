@@ -1,0 +1,27 @@
+@model TrafficFine
+@{ ViewData["Title"] = Model.ReferenceNumber; var canEdit = FineWorkflowService.CanEdit(Model, User); var canDecide = FineWorkflowService.CanDecide(Model, User); }
+<a class="back-link" asp-action="Index">← Trafik cezalarına dön</a>
+<div class="page-heading"><div><p class="eyebrow">CEZA DETAYI · #@Model.Id.ToString("D4")</p><h1>@Model.ReferenceNumber</h1><p class="muted">@Model.Vehicle.Plate · @Model.Vehicle.Brand @Model.Vehicle.Model</p></div><partial name="_Status" model="Model.Status" /></div>
+<div class="detail-grid"><section class="panel"><div class="panel-heading"><h2>Ceza bilgileri</h2>@if (canEdit) { <a class="text-link" asp-action="Edit" asp-route-id="@Model.Id">Düzenle ↗</a> }</div><dl class="detail-list"><div><dt>Araç plakası</dt><dd><span class="plate">@Model.Vehicle.Plate</span></dd></div><div><dt>Araç tipi</dt><dd>@Model.Vehicle.Type.Label()</dd></div><div><dt>İhlal tarihi</dt><dd>@Model.ViolationDate.ToString("dd MMMM yyyy")</dd></div><div><dt>Ceza tutarı</dt><dd class="large-amount">@Model.Amount.ToString("N2") ₺</dd></div><div><dt>Oluşturulma</dt><dd>@Model.CreatedAt.ToOffset(TimeSpan.FromHours(3)).ToString("dd.MM.yyyy HH:mm")</dd></div><div class="description-row"><dt>Açıklama</dt><dd class="preserve-lines">@Model.Description</dd></div></dl></section>
+<section class="panel action-panel"><div class="panel-heading"><h2>Sıradaki adım</h2></div><div class="action-content">
+@if (canEdit)
+{
+<p class="eyebrow">OPERASYON</p><h3>Onaya hazır mı?</h3><p class="muted">Bilgileri kontrol edip yöneticiye gönderin. Onay sürecindeki kayıt düzenlenemez.</p>
+<form asp-action="Decide" method="post" data-confirm="Bu kayıt yönetici onayına gönderilecek. Devam edilsin mi?"><input type="hidden" name="Id" value="@Model.Id" /><input type="hidden" name="Version" value="@Model.Version" /><input type="hidden" name="Action" value="Submitted" /><button class="btn primary full" type="submit">Yönetici onayına gönder →</button></form>
+}
+else if (canDecide)
+{
+<p class="eyebrow">@(Model.Status == FineStatus.ManagerApproval ? "YÖNETİCİ" : "FİNANS")</p><h3>Kaydı değerlendirin</h3><p class="muted">Onay, kaydı bir sonraki aşamaya taşır. Ret için gerekçe girilmelidir.</p>
+<form asp-action="Decide" method="post" data-decision><input type="hidden" name="Id" value="@Model.Id" /><input type="hidden" name="Version" value="@Model.Version" /><div class="field"><label for="note">Açıklama / ret nedeni</label><textarea id="note" name="Note" rows="3" maxlength="1000"></textarea></div><div class="decision-buttons"><button class="btn danger" name="Action" value="Rejected" type="submit">Reddet</button><button class="btn primary" name="Action" value="Approved" type="submit">Onayla ✓</button></div></form>
+}
+else if (Model.Status == FineStatus.Completed)
+{ <span class="completed-icon">✓</span><h3>Onay süreci tamamlandı</h3><p class="muted">Bu kayıt korunur ve değiştirilemez. Tamamlandı durumu ödeme yapıldığı anlamına gelmez.</p> }
+else
+{ <h3>@Model.Status.Label()</h3><p class="muted">Bu aşamadaki işlem yetkili kullanıcıyı bekliyor. Onay geçmişini aşağıdan inceleyebilirsiniz.</p> }
+</div></section></div>
+<section class="panel history-panel"><div class="panel-heading"><div><h2>İşlem ve onay geçmişi</h2><p class="muted">Tüm adımlar, kullanıcı ve zaman bilgisiyle saklanır. Saatler Türkiye saatidir.</p></div><span class="count-pill">@Model.History.Count işlem</span></div><ol class="timeline">
+@foreach (var item in Model.History.OrderByDescending(x => x.OccurredAt).ThenByDescending(x => x.Id))
+{
+<li><span class="timeline-dot @(item.Action == WorkflowAction.Rejected ? "rejected" : "")"></span><div class="timeline-heading"><strong>@item.Action.Label()</strong><time>@item.OccurredAt.ToOffset(TimeSpan.FromHours(3)).ToString("dd.MM.yyyy HH:mm:ss")</time></div><p class="timeline-user">@item.ActorName</p><div class="transition">@(item.PreviousStatus?.Label() ?? "Kayıt yok") <span>→</span> @item.NewStatus.Label()</div>@if (!string.IsNullOrWhiteSpace(item.Note)) { <p class="timeline-note preserve-lines">@item.Note</p> }</li>
+}
+</ol></section>
